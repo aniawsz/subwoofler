@@ -2,14 +2,18 @@ import numpy as np
 import time
 import wave
 
+from threading import Event, Thread
+
 from config import BUFFER_SIZE, SAMPLE_NAME
 from player import Player
 from sample import EmptySampleException, Sample
 
 
-class Rompler(object):
+class Rompler(Thread):
 
     def __init__(self, *a, **k):
+        super(Rompler, self).__init__(*a, **k)
+
         sample = Sample(*self._read_sample())
         if len(sample.data) <= 0:
             raise EmptySampleException
@@ -22,6 +26,8 @@ class Rompler(object):
             number_of_channels=sample.number_of_channels,
             sample_rate=sample.sample_rate,
         )
+
+        self.stop = Event()
 
     def _read_sample(self):
         with wave.open(SAMPLE_NAME, "rb") as f:
@@ -36,5 +42,5 @@ class Rompler(object):
 
     def run(self):
         with self._player.stream_audio():
-            while True:
+            while not self.stop.is_set():
                 time.sleep(0.1)

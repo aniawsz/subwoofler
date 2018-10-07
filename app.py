@@ -1,12 +1,16 @@
 from getch import getch
+from rompler import Rompler
 from translations import KEYBOARD_KEY_TO_MIDI_NOTE
 
 
 def run():
+    rompler = Rompler(name="AudioThread")
+    rompler.start()
     while True:
         char = getch()
         if (char == 'q'):
             print("quitting")
+            rompler.stop.set()
             exit(0)
         else:
             print("pressed: ", char)
