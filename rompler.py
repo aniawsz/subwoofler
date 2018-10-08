@@ -26,6 +26,8 @@ class Rompler(Thread):
         self._max_position = len(sample.data) - 1
         self._current_position = 0
 
+        self._zeros = np.zeros(BUFFER_SIZE, dtype=self._data_type)
+
         self._player = Player(
             generate_data_callback=self._generate_next_buffer,
             sample_width=sample.sample_width,
@@ -67,7 +69,7 @@ class Rompler(Thread):
                 count=BUFFER_SIZE
             )
             return sample_buffer
-        return np.zeros(BUFFER_SIZE, dtype=self._data_type)
+        return self._zeros
 
     def run(self):
         with self._player.stream_audio():
