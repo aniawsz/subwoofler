@@ -32,7 +32,11 @@ class Sample(object):
             self._data_type = SAMPLE_WIDTH_TO_NP_DATA_TYPE[sample_width]
         except KeyError:
             raise UnsupportedSampleWidth()
-        self._data = np.fromstring(raw_data, self._data_type)
+
+        data = np.fromstring(raw_data, self._data_type)
+        # Add the padding of one extra sample for linear interpolation in the player
+        padding = np.zeros(1, dtype=self._data_type)
+        self._data = np.append(data, padding)
 
         self._sample_width = sample_width
 

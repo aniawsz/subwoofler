@@ -7,6 +7,15 @@ from threading import Event, Thread
 from config import BUFFER_SIZE, SAMPLE_NAME
 from player import Player
 from sample import EmptySampleException, Sample
+from translations import midi_note_to_speed
+
+
+def lerp(left, right, fraction):
+    """
+    Interpolates linearly between two given points.
+    Fraction is a number in the range [0, 1].
+    """
+    return (1 - fraction) * left + fraction * right
 
 
 class Rompler(Thread):
@@ -23,10 +32,13 @@ class Rompler(Thread):
         self._sample = sample
         self._data_type = sample.data_type
 
-        self._max_position = len(sample.data) - 1
-        self._current_position = 0
+        # Subtracting the last padding zero for interpolation (see the Sample class)
+        self._max_position = len(sample.data) - 2
+        self._current_position = 0.0
 
         self._zeros = np.zeros(BUFFER_SIZE, dtype=self._data_type)
+
+        self._playback_speed = 1.0
 
         self._player = Player(
             generate_data_callback=self._generate_next_buffer,
@@ -51,8 +63,12 @@ class Rompler(Thread):
             position = self._current_position
             if position < self._max_position:
                 sample_index = int(position)
-                yield data[sample_index]
-                self._current_position += 1
+                yield lerp(
+                    data[sample_index],
+                    data[sample_index + 1],
+                    position - sample_index
+                )
+                self._current_position += self._playback_speed
             else:
                 yield 0
 
@@ -60,7 +76,8 @@ class Rompler(Thread):
         # Check if a new note was added to the queue; if so, play the new note
         if not self._notes_queue.empty():
             self._note = self._notes_queue.get()
-            self._current_position = 0
+            self._current_position = 0.0
+            self._playback_speed = midi_note_to_speed(self._note)
 
         if self._note:
             sample_buffer = np.fromiter(
