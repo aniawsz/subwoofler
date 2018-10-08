@@ -11,14 +11,20 @@ from sample import EmptySampleException, Sample
 
 class Rompler(Thread):
 
-    def __init__(self, *a, **k):
+    def __init__(self, notes_queue, *a, **k):
         super(Rompler, self).__init__(*a, **k)
+
+        self._notes_queue = notes_queue
+        self._note = None
 
         sample = Sample(*self._read_sample())
         if len(sample.data) <= 0:
             raise EmptySampleException
         self._sample = sample
         self._data_type = sample.data_type
+
+        self._max_position = len(sample.data) - 1
+        self._current_position = 0
 
         self._player = Player(
             generate_data_callback=self._generate_next_buffer,
@@ -37,7 +43,30 @@ class Rompler(Thread):
             sample_width = f.getsampwidth()
             return fs, channels_no, data, sample_width
 
+    def _generate_next_sample_buffer(self):
+        data = self._sample.data
+        for _ in range(BUFFER_SIZE):
+            position = self._current_position
+            if position < self._max_position:
+                sample_index = int(position)
+                yield data[sample_index]
+                self._current_position += 1
+            else:
+                yield 0
+
     def _generate_next_buffer(self):
+        # Check if a new note was added to the queue; if so, play the new note
+        if not self._notes_queue.empty():
+            self._note = self._notes_queue.get()
+            self._current_position = 0
+
+        if self._note:
+            sample_buffer = np.fromiter(
+                self._generate_next_sample_buffer(),
+                dtype=self._data_type,
+                count=BUFFER_SIZE
+            )
+            return sample_buffer
         return np.zeros(BUFFER_SIZE, dtype=self._data_type)
 
     def run(self):
