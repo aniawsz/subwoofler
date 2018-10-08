@@ -5,6 +5,7 @@ import wave
 from threading import Event, Thread
 
 from config import BUFFER_SIZE, SAMPLE_NAME
+from oscillator import LFO
 from player import Player
 from sample import EmptySampleException, Sample
 from translations import midi_note_to_speed
@@ -47,6 +48,10 @@ class Rompler(Thread):
             sample_rate=sample.sample_rate,
         )
 
+        self._lfo_on = True
+        self._lfo = LFO(0.5, sample.sample_rate)
+        self._gain = 1
+
         self.stop = Event()
 
     def _read_sample(self):
@@ -56,6 +61,19 @@ class Rompler(Thread):
             data = f.readframes(-1)
             sample_width = f.getsampwidth()
             return fs, channels_no, data, sample_width
+
+    def _gains_for_buffer(self):
+        """
+        Returns the volume amplification for each sample in the buffer.
+        The LFO returns values from -1 to 1. We normalize it to get values from 0 to 1.
+        """
+        if self._lfo_on:
+            lfo_buffer = np.fromiter(
+                self._lfo.generate_next_buffer(BUFFER_SIZE),
+                dtype=np.float
+            )
+            return self._gain * ((lfo_buffer - 1)/2 + 1)
+        return self._gain
 
     def _generate_next_sample_buffer(self):
         data = self._sample.data
@@ -82,10 +100,11 @@ class Rompler(Thread):
         if self._note:
             sample_buffer = np.fromiter(
                 self._generate_next_sample_buffer(),
-                dtype=self._data_type,
+                dtype=np.float,
                 count=BUFFER_SIZE
             )
-            return sample_buffer
+            sample_buffer *= self._gains_for_buffer()
+            return sample_buffer.astype(self._data_type)
         return self._zeros
 
     def run(self):
