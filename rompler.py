@@ -25,7 +25,7 @@ class Rompler(Thread):
         super(Rompler, self).__init__(*a, **k)
 
         self._notes_queue = notes_queue
-        self._note = None
+        self._current_note = None
 
         sample = Sample(*self._read_sample())
         if len(sample.data) <= 0:
@@ -96,11 +96,11 @@ class Rompler(Thread):
     def _generate_next_buffer(self):
         # Check if a new note was added to the queue; if so, play the new note
         if not self._notes_queue.empty():
-            self._note = self._notes_queue.get()
+            self._current_note = self._notes_queue.get()
             self._current_position = 0.0
-            self._playback_speed = midi_note_to_speed(self._note)
+            self._playback_speed = midi_note_to_speed(self._current_note)
 
-        if self._note:
+        if self._current_note:
             sample_buffer = np.fromiter(
                 self._generate_next_sample_buffer(),
                 dtype=np.float,
