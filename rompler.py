@@ -48,7 +48,7 @@ class Rompler(Thread):
             sample_rate=sample.sample_rate,
         )
 
-        self._lfo_on = True
+        self._lfo_on = False
         self._lfo = LFO(0.5, sample.sample_rate)
         self._gain = 1
 
