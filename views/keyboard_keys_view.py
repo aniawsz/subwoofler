@@ -1,8 +1,8 @@
 import tkinter as tk
 
-from tkinter import font as tkFont
-
-from .helpers import create_round_rectangle
+from .elements import SquareElement
+from .helpers import create_round_rectangle, make_font
+from .settings import ColorScheme
 
 
 class Layout(object):
@@ -21,12 +21,10 @@ class Layout(object):
     black_piano_keys_spacing = 21
 
 
-class KeyboardKeyItem(object):
-    side_width = 38
-    radius = 18
-    fill_color = "#bfbcaf"
-    active_color = "#ff473e"
-    font_color = "#2b3b47"
+class KeyboardKeyItem(SquareElement):
+    fill_color = ColorScheme.light_gray
+    active_color = ColorScheme.red
+    font_color = ColorScheme.navy
     font_size = 16
 
 
@@ -60,7 +58,7 @@ class KeyboardKeysView(object):
     def _create_keyboard_key_items(self):
         keyboard_key_items = {}
 
-        font = tkFont.Font(family="Courier", size=KeyboardKeyItem.font_size)
+        font = make_font(size=KeyboardKeyItem.font_size)
 
         width = KeyboardKeyItem.side_width
 
@@ -74,7 +72,7 @@ class KeyboardKeysView(object):
                 Layout.white_keys_begin_y,
                 spacing,
                 white_keys_margin,
-                font
+                font,
             )
         )
 
@@ -88,7 +86,7 @@ class KeyboardKeysView(object):
                 Layout.black_keys_begin_y,
                 spacing,
                 left_black_keys_margin,
-                font
+                font,
             )
         )
 
@@ -99,7 +97,7 @@ class KeyboardKeysView(object):
                 Layout.black_keys_begin_y,
                 spacing,
                 left_black_keys_margin,
-                font
+                font,
             )
         )
 
