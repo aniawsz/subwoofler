@@ -48,10 +48,9 @@ class Rompler(Thread):
             sample_rate=sample.sample_rate,
         )
 
-        self._lfo_on = False
-        self._lfo = LFO(0.5, sample.sample_rate)
         self._gain = 1
 
+        self.lfo = LFO(0.5, sample.sample_rate)
         self.stop = Event()
 
     def _read_sample(self):
@@ -67,9 +66,9 @@ class Rompler(Thread):
         Returns the volume amplification for each sample in the buffer.
         The LFO returns values from -1 to 1. We normalize it to get values from 0 to 1.
         """
-        if self._lfo_on:
+        if self.lfo.is_on:
             lfo_buffer = np.fromiter(
-                self._lfo.generate_next_buffer(BUFFER_SIZE),
+                self.lfo.generate_next_buffer(BUFFER_SIZE),
                 dtype=np.float
             )
             return self._gain * ((lfo_buffer - 1)/2 + 1)

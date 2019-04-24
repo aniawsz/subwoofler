@@ -13,14 +13,14 @@ class Application(object):
 
         self._window = window
 
-        # Create the app's GUI
-        self._view = MainView(window)
-
         # Create and start an audio thread.
         # It's going to communicate with the main thread through a thread-safe queue.
         self._notes_queue = Queue(maxsize=1)
         self._rompler = Rompler(name="AudioThread", notes_queue=self._notes_queue)
         self._rompler.start()
+
+        # Create the app's GUI
+        self._view = MainView(window, self._rompler)
 
         # Stop the audio thread when the app is closing
         window.protocol("WM_DELETE_WINDOW", self._on_closing)

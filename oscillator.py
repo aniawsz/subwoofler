@@ -9,12 +9,22 @@ class LFO(object):
     def __init__(self, rate, sample_rate):
         self._rate = rate
         self._sample_rate = sample_rate
+        self._is_on = False
+
         # Indicate the current position in the waveform cycle
         self._phase = 0.0
         self._update_phase_increment()
 
     def _update_phase_increment(self):
         self._phase_increment =  2 * np.pi * self._rate / self._sample_rate
+
+    @property
+    def is_on(self):
+        return self._is_on
+
+    @is_on.setter
+    def is_on(self, value):
+        self._is_on = value
 
     @property
     def rate(self):

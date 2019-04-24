@@ -2,10 +2,11 @@ import os.path
 import tkinter as tk
 
 from .keyboard_keys_view import KeyboardKeysView
+from .lfo_view import LfoView
 
 
 class MainView(tk.Frame):
-    def __init__(self, window, *a, **kw):
+    def __init__(self, window, rompler, *a, **kw):
         super(MainView, self).__init__(window, *a, **kw)
 
         self._window = window
@@ -22,6 +23,8 @@ class MainView(tk.Frame):
         self._background_image = self._create_background_image()
 
         self._keyboard_keys_view = KeyboardKeysView(self._canvas)
+
+        self._lfo_view = LfoView(self._canvas, rompler.lfo)
 
     def on_key_pressed(self, key):
         self._keyboard_keys_view.on_key_pressed(key)
