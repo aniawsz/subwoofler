@@ -4,7 +4,7 @@ from queue import Queue
 
 from rompler import Rompler
 from translations import KEYBOARD_KEY_TO_MIDI_NOTE
-from view import MainView
+from views.main_view import MainView
 
 
 class Application(object):

@@ -2,21 +2,7 @@ import tkinter as tk
 
 from tkinter import font as tkFont
 
-
-def create_round_rectangle(canvas, x1, y1, x2, y2, radius=25, **kwargs):
-    r = radius
-    points = (
-        x1+r, y1, x1+r, y1,
-        x2-r, y1, x2-r, y1,
-        x2, y1, x2, y1+r,
-        x2, y1+r, x2, y2-r,
-        x2, y2-r, x2, y2,
-        x2-r, y2, x2-r, y2,
-        x1+r, y2, x1+r, y2,
-        x1, y2, x1, y2-r,
-        x1, y2-r, x1, y1+r,
-        x1, y1+r, x1, y1)
-    return canvas.create_polygon(points, **kwargs, smooth=True)
+from .helpers import create_round_rectangle
 
 
 class Layout(object):
@@ -49,22 +35,12 @@ RIGHT_BLACK_KEYS = ['t', 'y', 'u']
 WHITE_KEYS = ['a', 's', 'd', 'f', 'g', 'h', 'j']
 
 
-class MainView(tk.Frame):
-    def __init__(self, window, *a, **kw):
-        super(MainView, self).__init__(window, *a, **kw)
+class KeyboardKeysView(object):
+    def __init__(self, canvas, *a, **k):
+        super(KeyboardKeysView, self).__init__(*a, **k)
 
-        self._window = window
+        self._canvas = canvas
 
-        # Set up the main window
-        window.title("Subwoofler")
-        window.geometry("800x760+360+20")
-        window.config(bg="#ffffff")
-        window.resizable(0,0)
-
-        self._canvas = tk.Canvas(window)
-        self._canvas.pack()
-
-        self._background_image = self._create_background_image()
         self._keyboard_key_items = self._create_keyboard_key_items()
 
     def on_key_pressed(self, key):
@@ -80,17 +56,6 @@ class MainView(tk.Frame):
             self._canvas.itemconfig(item_id, fill=KeyboardKeyItem.fill_color)
         except KeyError:
             pass
-
-    def _create_background_image(self):
-        background_image = tk.PhotoImage(file="images/keyboard.ppm")
-
-        self._canvas.configure(
-            width=background_image.width(),
-            height=background_image.height(),
-        )
-        self._canvas.create_image(0, 0, anchor=tk.NW, image=background_image)
-
-        return background_image
 
     def _create_keyboard_key_items(self):
         keyboard_key_items = {}
