@@ -2,7 +2,6 @@ import tkinter as tk
 
 from queue import Queue
 
-from getch import getch
 from rompler import Rompler
 from translations import KEYBOARD_KEY_TO_MIDI_NOTE
 
@@ -25,28 +24,18 @@ class Application(tk.Frame):
         # Stop the audio thread when the app is closing
         root.protocol("WM_DELETE_WINDOW", self._on_closing)
 
+        root.bind("<Key>", self._handle_keypress)
+
     def _on_closing(self):
         self._rompler.stop.set()
         self._root.destroy()
 
-
-def run():
-    notes_queue = Queue(maxsize=1)
-    rompler = Rompler(name="AudioThread", notes_queue=notes_queue)
-    rompler.start()
-    while True:
-        char = getch()
-        if (char == 'q'):
-            print("quitting")
-            rompler.stop.set()
-            exit(0)
-        else:
-            print("pressed: ", char)
-            try:
-                midi_note = KEYBOARD_KEY_TO_MIDI_NOTE[char]
-                notes_queue.put(midi_note)
-            except KeyError:
-                print("note not supported")
+    def _handle_keypress(self, event):
+        try:
+            midi_note = KEYBOARD_KEY_TO_MIDI_NOTE[event.char]
+            self._notes_queue.put(midi_note)
+        except KeyError:
+            print("note not supported")
 
 
 if __name__ == '__main__':
