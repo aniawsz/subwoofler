@@ -49,4 +49,5 @@ class Application(object):
 if __name__ == '__main__':
     root = tk.Tk()
     app = Application(root)
+    root.attributes("-topmost", True)
     root.mainloop()
