@@ -1,5 +1,53 @@
 import tkinter as tk
 
+from tkinter import font as tkFont
+
+
+def create_round_rectangle(canvas, x1, y1, x2, y2, radius=25, **kwargs):
+    r = radius
+    points = (
+        x1+r, y1, x1+r, y1,
+        x2-r, y1, x2-r, y1,
+        x2, y1, x2, y1+r,
+        x2, y1+r, x2, y2-r,
+        x2, y2-r, x2, y2,
+        x2-r, y2, x2-r, y2,
+        x1+r, y2, x1+r, y2,
+        x1, y2, x1, y2-r,
+        x1, y2-r, x1, y1+r,
+        x1, y1+r, x1, y1)
+    return canvas.create_polygon(points, **kwargs, smooth=True)
+
+
+class Layout(object):
+
+    left_black_keys_begin_x = 240
+    right_black_keys_begin_x = 440
+    black_keys_begin_y = 503
+
+    white_keys_begin_x = 201
+    white_keys_begin_y = 661
+
+    white_piano_key_width = 57
+    white_piano_keys_spacing = 9
+
+    black_piano_key_width = 45
+    black_piano_keys_spacing = 21
+
+
+class KeyboardKeyItem(object):
+    side_width = 38
+    radius = 18
+    fill_color = "#bfbcaf"
+    active_color = "#ff473e"
+    font_color = "#2b3b47"
+    font_size = 16
+
+
+LEFT_BLACK_KEYS = ['w', 'e']
+RIGHT_BLACK_KEYS = ['t', 'y', 'u']
+WHITE_KEYS = ['a', 's', 'd', 'f', 'g', 'h', 'j']
+
 
 class MainView(tk.Frame):
     def __init__(self, window, *a, **kw):
@@ -9,21 +57,137 @@ class MainView(tk.Frame):
 
         # Set up the main window
         window.title("Subwoofler")
-        window.geometry("760x720+360+46")
+        window.geometry("800x760+360+20")
         window.config(bg="#ffffff")
         window.resizable(0,0)
 
-        self._keyboard_image = self._create_keyboard_image()
+        self._canvas = tk.Canvas(window)
+        self._canvas.pack()
 
-    def _create_keyboard_image(self):
-        keyboard_image = tk.PhotoImage(file="images/keyboard.ppm")
+        self._background_image = self._create_background_image()
+        self._keyboard_key_items = self._create_keyboard_key_items()
 
-        keyboard_canvas = tk.Canvas(
-            self._window,
-            width=keyboard_image.width(),
-            height=keyboard_image.height(),
+    def on_key_pressed(self, key):
+        try:
+            item_id = self._keyboard_key_items[key]
+            self._canvas.itemconfig(item_id, fill=KeyboardKeyItem.active_color)
+        except KeyError:
+            pass
+
+    def on_key_released(self, key):
+        try:
+            item_id = self._keyboard_key_items[key]
+            self._canvas.itemconfig(item_id, fill=KeyboardKeyItem.fill_color)
+        except KeyError:
+            pass
+
+    def _create_background_image(self):
+        background_image = tk.PhotoImage(file="images/keyboard.ppm")
+
+        self._canvas.configure(
+            width=background_image.width(),
+            height=background_image.height(),
         )
-        keyboard_canvas.pack()
-        keyboard_canvas.create_image(0, 0, anchor=tk.NW, image=keyboard_image)
+        self._canvas.create_image(0, 0, anchor=tk.NW, image=background_image)
 
-        return keyboard_image
+        return background_image
+
+    def _create_keyboard_key_items(self):
+        keyboard_key_items = {}
+
+        font = tkFont.Font(family="Courier", size=KeyboardKeyItem.font_size)
+
+        width = KeyboardKeyItem.side_width
+
+        white_keys_margin = Layout.white_piano_key_width - width
+        spacing = Layout.white_piano_key_width + Layout.white_piano_keys_spacing
+
+        keyboard_key_items.update(
+            self._create_keyboard_key_items_for_keys(
+                WHITE_KEYS,
+                Layout.white_keys_begin_x,
+                Layout.white_keys_begin_y,
+                spacing,
+                white_keys_margin,
+                font
+            )
+        )
+
+        left_black_keys_margin = Layout.black_piano_key_width - width
+        spacing = Layout.black_piano_key_width + Layout.black_piano_keys_spacing
+
+        keyboard_key_items.update(
+            self._create_keyboard_key_items_for_keys(
+                LEFT_BLACK_KEYS,
+                Layout.left_black_keys_begin_x,
+                Layout.black_keys_begin_y,
+                spacing,
+                left_black_keys_margin,
+                font
+            )
+        )
+
+        keyboard_key_items.update(
+            self._create_keyboard_key_items_for_keys(
+                RIGHT_BLACK_KEYS,
+                Layout.right_black_keys_begin_x,
+                Layout.black_keys_begin_y,
+                spacing,
+                left_black_keys_margin,
+                font
+            )
+        )
+
+        return keyboard_key_items
+
+    def _create_keyboard_key_items_for_keys(
+        self,
+        keys,
+        begin_x,
+        begin_y,
+        spacing,
+        margin,
+        font
+    ):
+        keyboard_key_items = {}
+
+        width = KeyboardKeyItem.side_width
+
+        even_margins = margin % 2 == 0
+        margin_left = int(margin / 2)
+        begin_x += margin_left
+
+        font_size = KeyboardKeyItem.font_size
+        letter_width = font.metrics()['linespace']
+
+        text_margin_left = int(width / 2 - letter_width / 2) + 4
+        text_margin_top = int(width / 2 - font_size / 2)
+
+        for ix, key in enumerate(keys):
+            keyboard_key_items[key] = create_round_rectangle(
+                self._canvas,
+                begin_x,
+                begin_y,
+                begin_x + width,
+                begin_y + width,
+                radius=KeyboardKeyItem.radius,
+                fill=KeyboardKeyItem.fill_color,
+            )
+
+            self._canvas.create_text(
+                begin_x + text_margin_left,
+                begin_y + text_margin_top,
+                text=key.upper(),
+                width=width,
+                anchor=tk.NW,
+                font=font,
+                fill=KeyboardKeyItem.font_color,
+            )
+
+            begin_x += spacing
+
+            # Compensate for uneven left and right margins to avoid drifting to the left
+            if not even_margins and ix % 2 == 0:
+                begin_x += 1
+
+        return keyboard_key_items

@@ -26,6 +26,7 @@ class Application(object):
         window.protocol("WM_DELETE_WINDOW", self._on_closing)
 
         window.bind("<Key>", self._handle_keypress)
+        window.bind("<KeyRelease>", self._handle_keyrelease)
 
     def _on_closing(self):
         self._rompler.stop.set()
@@ -33,10 +34,16 @@ class Application(object):
 
     def _handle_keypress(self, event):
         try:
-            midi_note = KEYBOARD_KEY_TO_MIDI_NOTE[event.char]
+            key = event.char
+            midi_note = KEYBOARD_KEY_TO_MIDI_NOTE[key]
             self._notes_queue.put(midi_note)
+            self._view.on_key_pressed(key)
         except KeyError:
             print("note not supported")
+
+    def _handle_keyrelease(self, event):
+        key = event.char
+        self._view.on_key_released(key)
 
 
 if __name__ == '__main__':
