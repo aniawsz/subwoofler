@@ -39,7 +39,8 @@ class Application(object):
             self._notes_queue.put(midi_note)
             self._view.on_key_pressed(key)
         except KeyError:
-            print("note not supported")
+            # note not supported
+            pass
 
     def _handle_keyrelease(self, event):
         key = event.char
