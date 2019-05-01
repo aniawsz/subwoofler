@@ -4,6 +4,7 @@ import tkinter as tk
 from .keyboard_keys_view import KeyboardKeysView
 from .lfo_view import LfoView
 
+DIR_NAME = os.path.dirname(__file__)
 
 class MainView(tk.Frame):
     def __init__(self, window, rompler, *a, **kw):
@@ -21,6 +22,7 @@ class MainView(tk.Frame):
         self._canvas.pack()
 
         self._background_image = self._create_background_image()
+        self._logo = self._create_logo()
 
         self._keyboard_keys_view = KeyboardKeysView(self._canvas)
 
@@ -33,8 +35,7 @@ class MainView(tk.Frame):
         self._keyboard_keys_view.on_key_released(key)
 
     def _create_background_image(self):
-        current_directory = os.path.dirname(__file__)
-        image_path = os.path.join(current_directory, "images/keyboard.ppm")
+        image_path = os.path.join(DIR_NAME, "images/keyboard.ppm")
         background_image = tk.PhotoImage(file=image_path)
 
         self._canvas.configure(
@@ -44,3 +45,12 @@ class MainView(tk.Frame):
         self._canvas.create_image(0, 0, anchor=tk.NW, image=background_image)
 
         return background_image
+
+    def _create_logo(self):
+        image_path = os.path.join(DIR_NAME, "images/bark180navy.ppm")
+        image = tk.PhotoImage(file=image_path)
+        self._logo_label = tk.Label(None, image=image)
+
+        self._canvas.create_window(555, 155, anchor=tk.NW, window=self._logo_label)
+
+        return image
