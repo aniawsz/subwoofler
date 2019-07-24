@@ -1,4 +1,4 @@
-import tkinter as tk
+import Tkinter as tk
 
 from .elements import SquareElement
 from .helpers import create_round_rectangle

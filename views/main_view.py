@@ -1,5 +1,5 @@
 import os.path
-import tkinter as tk
+import Tkinter as tk
 
 from .keyboard_keys_view import KeyboardKeysView
 from .lfo_view import LfoView
@@ -8,7 +8,7 @@ DIR_NAME = os.path.dirname(__file__)
 
 class MainView(tk.Frame):
     def __init__(self, window, rompler, *a, **kw):
-        super(MainView, self).__init__(window, *a, **kw)
+        tk.Frame.__init__(self, window, *a, **kw)
 
         self._window = window
 

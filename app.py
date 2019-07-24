@@ -1,4 +1,4 @@
-import tkinter as tk
+import Tkinter as tk
 
 from Queue import Queue
 

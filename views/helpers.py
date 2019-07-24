@@ -1,4 +1,4 @@
-from tkinter import font as tkFont
+import tkFont
 
 from .settings import Font
 
