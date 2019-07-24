@@ -17,7 +17,7 @@ def create_round_rectangle(canvas, x1, y1, x2, y2, radius=25, **kwargs):
         x1, y2, x1, y2-r,
         x1, y2-r, x1, y1+r,
         x1, y1+r, x1, y1)
-    return canvas.create_polygon(points, **kwargs, smooth=True)
+    return canvas.create_polygon(points, smooth=True, **kwargs)
 
 
 def make_font(family=Font.family, size=Font.size):
