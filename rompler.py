@@ -54,12 +54,16 @@ class Rompler(Thread):
         self.stop = Event()
 
     def _read_sample(self):
-        with wave.open(SAMPLE_NAME, "rb") as f:
-            fs = f.getframerate()
-            channels_no = f.getnchannels()
-            data = f.readframes(-1)
-            sample_width = f.getsampwidth()
-            return fs, channels_no, data, sample_width
+        f = wave.open(SAMPLE_NAME, "rb")
+
+        fs = f.getframerate()
+        channels_no = f.getnchannels()
+        data = f.readframes(-1)
+        sample_width = f.getsampwidth()
+
+        f.close()
+
+        return fs, channels_no, data, sample_width
 
     def _gains_for_buffer(self):
         """
