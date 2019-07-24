@@ -1,6 +1,6 @@
 import tkinter as tk
 
-from queue import Queue
+from Queue import Queue
 
 from rompler import Rompler
 from translations import KEYBOARD_KEY_TO_MIDI_NOTE
