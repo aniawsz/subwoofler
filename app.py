@@ -43,7 +43,7 @@ class Application(object):
             pass
 
     def _handle_keyrelease(self, event):
-        key = event.char
+        key = event.char or event.keysym
         self._view.on_key_released(key)
 
 
