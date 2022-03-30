@@ -1,6 +1,5 @@
-import pyaudio
-
-from contextlib import contextmanager
+import sounddevice
+import numpy as np
 
 from config import BUFFER_SIZE
 
@@ -24,21 +23,27 @@ class Player(object):
     def _get_next_buffer(self, in_data, frame_count, time_info, status):
         return (self._generate_data(), pyaudio.paContinue)
 
-    @contextmanager
     def stream_audio(self):
-        pya = pyaudio.PyAudio()
-        audio_stream = pya.open(
-            format=pyaudio.get_format_from_width(self._sample_width),
+        def callback(outdata, frames, time, status):
+            data = self._generate_data()
+            if data.ndim < 2: # bodge?
+                data = data.reshape(-1, 1)
+            outdata[:] = data
+
+        def get_dtype_from_width(width):
+            if width == 1:
+                return np.uint8
+            elif width == 2:
+                return np.int16
+            elif width == 4:
+                return np.float32
+            else:
+                raise ValueError("Invalid width: %d" % width)
+
+        return sounddevice.OutputStream(
             channels=self._number_of_channels,
-            rate=self._sample_rate,
-            output=True,
-            stream_callback=self._get_next_buffer,
-            frames_per_buffer=BUFFER_SIZE,
+            callback=callback,
+            samplerate=self._sample_rate,
+            dtype=get_dtype_from_width(self._sample_width),
+            blocksize=BUFFER_SIZE
         )
-        audio_stream.start_stream()
-        try:
-            yield audio_stream
-        finally:
-            audio_stream.stop_stream()
-            audio_stream.close()
-            pya.terminate()

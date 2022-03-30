@@ -1,2 +1,2 @@
 numpy==1.22.3
-PyAudio==0.2.11
+sounddevice==0.4.4
