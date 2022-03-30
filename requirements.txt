@@ -1,2 +1,2 @@
-numpy==1.15.1
+numpy==1.22.3
 PyAudio==0.2.11
