@@ -18,7 +18,7 @@ class MainView(tk.Frame):
         window.config(bg="#ffffff")
         window.resizable(0,0)
 
-        self._canvas = tk.Canvas(window)
+        self._canvas = tk.Canvas(window, highlightthickness=0)
         self._canvas.pack()
 
         self._background_image = self._create_background_image()
@@ -49,7 +49,7 @@ class MainView(tk.Frame):
     def _create_logo(self):
         image_path = os.path.join(DIR_NAME, "images/bark180navy.ppm")
         image = tk.PhotoImage(file=image_path)
-        self._logo_label = tk.Label(None, image=image)
+        self._logo_label = tk.Label(None, image=image, borderwidth=0)
 
         self._canvas.create_window(555, 155, anchor=tk.NW, window=self._logo_label)
 
